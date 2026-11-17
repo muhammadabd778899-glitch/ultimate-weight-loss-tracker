@@ -1,17 +1,21 @@
 {
   "name": "Ultimate Weight Loss & Fitness Tracker",
-  "short_name": "Wellness Tracker",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#F6FBF6",
-  "theme_color": "#2E9D59",
-  "orientation": "portrait",
+  "short_name": "Weight Loss Tracker",
   "icons": [
     {
-      "src": "./assets/icon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml"
+      "src": "assets/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
-  "description": "Premium offline-first personal wellness and weight loss tracker."
+  "start_url": "./",
+  "display": "standalone",
+  "display_": "standalone",
+  "theme_color": "#2E9D59",
+  "background_color": "#ffffff"
 }
