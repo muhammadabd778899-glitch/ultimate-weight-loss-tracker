@@ -5,9 +5,21 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -16,17 +28,64 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
       - name: Build production
         run: npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Enable GitHub Actions as Pages source
+        continue-on-error: true
+        run: |
+          set -u
+          body='{"build_type":"workflow"}'
+          auth="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+          api="https://api.github.com/repos/${{ github.repository }}/pages"
+          code=$(curl -s -o /tmp/pages-put.json -w "%{http_code}" -X PUT \
+            -H "$auth" -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" -d "$body" "$api")
+          echo "PUT /pages -> HTTP $code"
+          if [ "$code" != "200" ] && [ "$code" != "204" ]; then
+            code=$(curl -s -o /tmp/pages-post.json -w "%{http_code}" -X POST \
+              -H "$auth" -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" -d "$body" "$api")
+            echo "POST /pages -> HTTP $code"
+          fi
+
+      - name: Upload Pages artifact
+        id: upload
+        continue-on-error: true
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          keep_files: true
-          dry_run: false
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Publish build to Pages branch root (fallback)
+        if: steps.deployment.outcome != 'success'
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf assets
+          cp -r dist/. .
+          touch .nojekyll
+          git add -f .nojekyll
+          git add index.html assets sw.js manifest.json
+          if git diff --cached --quiet; then
+            echo "No changes to publish."
+          else
+            git commit -m "chore: publish production build to Pages root [skip ci]"
+            git push origin HEAD:main
+          fi

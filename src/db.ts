@@ -289,9 +289,22 @@ function runMulti<R>(storeNames: StoreName[], mode: IDBTransactionMode, fn: (sto
 
 function getAllFromIndex(store: IDBObjectStore, indexName?: string): Promise<any[]> {
   return new Promise((resolve, reject) => {
-    const source = indexName ? store.index(indexName) : store;
+    // "…Desc" is a sorting request, not a real index: IndexedDB indexes cannot
+    // be descending, so resolve the ascending index and sort in memory.
+    const descending = Boolean(indexName && indexName.endsWith('Desc'));
+    const baseIndex = descending ? indexName!.slice(0, -'Desc'.length) : indexName;
+    const source =
+      baseIndex && store.indexNames.contains(baseIndex) ? store.index(baseIndex) : store;
     const req = source.getAll();
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      const rows: any[] = req.result;
+      if (descending) {
+        rows.sort((a, b) =>
+          String(b?.date ?? '').localeCompare(String(a?.date ?? ''))
+        );
+      }
+      resolve(rows);
+    };
     req.onerror = () => reject(new DBError('getAll failed', req.error));
   });
 }

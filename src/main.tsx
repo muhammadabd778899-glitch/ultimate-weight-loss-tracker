@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { App } from './router';
 import './index.css';
 import { initDB } from './db';
-import './registerSW';
+import { registerSW } from './registerSW';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -14,3 +14,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 initDB().catch((err) => {
   console.error('Failed to initialize database', err);
 });
+
+registerSW();

@@ -3,19 +3,24 @@
  * Service Worker — offline-first app shell cache.
  *
  * Strategy:
- * - Install: precache core shell files (index.html, manifest, logo).
+ * - Install: precache the shell (app page, manifest, icons).
  * - Fetch:
- *   • Navigation/HTML requests → network first, fallback to cached index.html (SPA routing).
+ *   • Navigation/HTML requests → network first, fallback to the cached shell.
  *   • Static assets (/assets/*, fonts, icons) → cache first, then network.
  *   • Everything else → network first.
  */
 
-const CACHE_NAME = 'uwlt-v1';
+const CACHE_NAME = 'uwlt-v2';
+// The worker lives at <base>/sw.js, so this yields the deployed base path.
+const BASE = self.location.pathname.replace(/sw\.js$/, '');
 const SHELL_URLS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './assets/logo.svg',
+  BASE,
+  `${BASE}index.html`,
+  `${BASE}manifest.json`,
+  `${BASE}assets/logo.svg`,
+  `${BASE}assets/icon.svg`,
+  `${BASE}assets/icons/icon-192x192.png`,
+  `${BASE}assets/icons/icon-512x512.png`,
 ];
 
 // Install — precache the shell
@@ -50,13 +55,15 @@ self.addEventListener('fetch', (event) => {
   // Only handle same-origin GET requests
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  const isAsset = url.pathname.startsWith('/ultimate-weight-loss-tracker/assets/') ||
-    url.pathname.endsWith('.js') || url.pathname.endsWith('.css');
+  const isAsset =
+    url.pathname.startsWith(`${BASE}assets/`) ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css');
   const isNavigation = request.mode === 'navigate' || request.destination === 'document';
 
   if (isNavigation) {
     event.respondWith(
-      fetch(request).catch(() => caches.match('./index.html'))
+      fetch(request).catch(() => caches.match(`${BASE}index.html`))
     );
     return;
   }
@@ -66,10 +73,12 @@ self.addEventListener('fetch', (event) => {
       caches.match(request).then((cached) => {
         if (cached) return cached;
         return fetch(request).then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+          }
           return response;
-        }).catch(() => cached);
+        });
       })
     );
     return;

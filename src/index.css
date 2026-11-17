@@ -11,6 +11,8 @@
     --dark: #203329;
     --secondary: #718078;
     --border: #E5EDE6;
+    --font-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      'Helvetica Neue', Arial, sans-serif;
   }
 
   html {
@@ -22,10 +24,6 @@
     color: var(--dark);
     font-family: var(--font-inter);
     -webkit-font-smoothing: antialiased;
-  }
-
-  var(--font-inter) {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   ::selection {

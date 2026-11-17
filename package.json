@@ -5,9 +5,12 @@
   "description": "Ultimate Weight Loss & Fitness Tracker - Premium offline-first PWA",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/prepare.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/prepare.mjs",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "deploy": "npm run build"

@@ -280,8 +280,13 @@ export function goalProgressPct(goal: Goal): number {
   const span = Math.max(1, daysBetween(parseLocalDate(goal.startDate), parseLocalDate(goal.targetDate)));
   const elapsed = Math.max(0, daysBetween(parseLocalDate(goal.startDate), parseLocalDate(today())));
   const timePct = Math.min(100, Math.max(0, (elapsed / span) * 100));
+  const range = goal.targetValue - goal.startingValue;
   const valuePct =
-    goal.targetValue === 0 ? 0 : Math.min(100, Math.max(0, Math.abs((goal.currentProgress - goal.startingValue) / (goal.targetValue - goal.startingValue)) * 100));
+    range === 0
+      ? goal.currentProgress >= goal.targetValue
+        ? 100
+        : 0
+      : Math.min(100, Math.max(0, Math.abs((goal.currentProgress - goal.startingValue) / range) * 100));
   return Math.round((timePct + valuePct) / 2);
 }
 
