@@ -149,15 +149,15 @@ export function MealsRecipes() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Meals & Recipes</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Meals & Recipes</h1>
         <Button onClick={() => setAddOpen(true)} size="sm">
           <Plus size={16} strokeWidth={2} /> Add Recipe
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row md:items-end gap-4">
         <div className="flex-1">
           <SearchFilter onSearch={setSearch} placeholder="Search recipes..." />
         </div>
@@ -184,38 +184,38 @@ export function MealsRecipes() {
                 const totals = nutritionTotals(r.ingredients);
                 const perServing = r.servings ? Math.round(totals.calories / r.servings) : 0;
                 return (
-                  <div key={r.id} className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-green-soft/50 transition-colors cursor-pointer" onClick={() => setViewId(r.id)}>
-                    <div className="flex-1">
+                  <div key={r.id} className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-[#FBFDFB] px-4 py-3 transition-colors hover:border-green-mint/60 cursor-pointer" onClick={() => setViewId(r.id)}>
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-dark font-medium">{r.name}</span>
-                        {r.isFavorite && <Star size={14} strokeWidth={2} fill="#E7BB59" className="text-yellow-500" />}
+                        <span className="truncate text-[13.5px] font-semibold text-dark">{r.name}</span>
+                        {r.isFavorite && <Star size={13} strokeWidth={2} fill="#E7BB59" className="shrink-0 text-[#E7BB59]" />}
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-secondary mt-1">
-                        <span>{r.category}</span>
-                        <span>· {r.servings} servings</span>
-                        {r.prepTimeMin && <span>· {r.prepTimeMin}min prep</span>}
-                        {r.cookTimeMin && <span>· {r.cookTimeMin}min cook</span>}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-green-deep font-semibold">{perServing} cal/serving</span>
-                        <span className="text-secondary">{totals.protein.toFixed(1)}P</span>
-                        <span className="text-secondary">{totals.carbs.toFixed(1)}C</span>
-                        <span className="text-secondary">{totals.fat.toFixed(1)}F</span>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-secondary">
+                        <span className="rounded-full border border-border/70 bg-white px-2 py-0.5 text-[10.5px] font-medium capitalize">{r.category}</span>
+                        <span>{r.servings} {Number(r.servings) === 1 ? 'serving' : 'servings'}</span>
+                        {r.prepTimeMin ? <span>· {r.prepTimeMin} min prep</span> : null}
+                        {r.cookTimeMin ? <span>· {r.cookTimeMin} min cook</span> : null}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setViewId(r.id); }} title="View">
-                        <BookOpen size={16} strokeWidth={2} />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toggleFavorite(r.id, r.isFavorite); }} title={r.isFavorite ? 'Unfavorite' : 'Favorite'}>
-                        <Star size={16} strokeWidth={2} fill={r.isFavorite ? '#E7BB59' : 'none'} />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); duplicate(r.id); }} title="Duplicate">
-                        <Copy size={16} strokeWidth={2} />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); deleteRecipe(r.id); }} title="Delete">
-                        <Trash2 size={16} strokeWidth={2} />
-                      </Button>
+                    <div className="flex shrink-0 items-center gap-4">
+                      <div className="hidden text-right sm:block">
+                        <p className="stat-number text-[13px] font-semibold text-green-deep">{perServing} <span className="text-[10.5px] font-medium text-secondary">cal/serving</span></p>
+                        <p className="mt-0.5 text-[11px] text-secondary">P {totals.protein.toFixed(1)} · C {totals.carbs.toFixed(1)} · F {totals.fat.toFixed(1)} g</p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setViewId(r.id); }} title="View">
+                          <BookOpen size={16} strokeWidth={2} />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toggleFavorite(r.id, r.isFavorite); }} title={r.isFavorite ? 'Unfavorite' : 'Favorite'}>
+                          <Star size={16} strokeWidth={2} fill={r.isFavorite ? '#E7BB59' : 'none'} />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); duplicate(r.id); }} title="Duplicate">
+                          <Copy size={16} strokeWidth={2} />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); deleteRecipe(r.id); }} title="Delete">
+                          <Trash2 size={16} strokeWidth={2} />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -266,7 +266,7 @@ export function MealsRecipes() {
                   </Button>
                 </div>
               ))}
-              <div className="grid grid-cols-4 gap-2 text-[11px] text-secondary">
+              <div className="grid grid-cols-4 gap-2 text-[12px] text-secondary">
                 <span>Cal</span><span>P</span><span>C</span><span>F</span>
               </div>
             </div>
@@ -324,16 +324,16 @@ function ViewRecipeModal({ recipeId, onClose }: { recipeId: string; onClose: () 
           </button>
         </div>
         {recipe.description && <p className="text-secondary">{recipe.description}</p>}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-secondary uppercase tracking-wider">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[12px] text-secondary uppercase tracking-wider">
           <span>Prep</span><span>{recipe.prepTimeMin || '—'} min</span><span>Cook</span><span>{recipe.cookTimeMin || '—'} min</span>
         </div>
         <div className="border border-border rounded-lg p-3">
           <h3 className="text-sm font-semibold text-dark mb-2">Nutrition (servings: {servingMultiplier})</h3>
           <div className="grid grid-cols-4 gap-4 text-sm">
-            <div><span className="block text-deep-green font-bold">{Math.round(totals.calories)}</span><span className="text-secondary text-[10px]">cal</span></div>
-            <div><span className="block text-deep-green font-bold">{totals.protein.toFixed(1)}</span><span className="text-secondary text-[10px]">P</span></div>
-            <div><span className="block text-deep-green font-bold">{totals.carbs.toFixed(1)}</span><span className="text-secondary text-[10px]">C</span></div>
-            <div><span className="block text-deep-green font-bold">{totals.fat.toFixed(1)}</span><span className="text-secondary text-[10px]">F</span></div>
+            <div><span className="block text-deep-green font-bold">{Math.round(totals.calories)}</span><span className="text-secondary text-[11px]">cal</span></div>
+            <div><span className="block text-deep-green font-bold">{totals.protein.toFixed(1)}</span><span className="text-secondary text-[11px]">P</span></div>
+            <div><span className="block text-deep-green font-bold">{totals.carbs.toFixed(1)}</span><span className="text-secondary text-[11px]">C</span></div>
+            <div><span className="block text-deep-green font-bold">{totals.fat.toFixed(1)}</span><span className="text-secondary text-[11px]">F</span></div>
           </div>
         </div>
         <div className="space-y-2">

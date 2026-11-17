@@ -3,14 +3,25 @@ import { cn } from './utils';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  interactive?: boolean;
 }
 
-export function Card({ className, padding = 'md', children, ...props }: CardProps) {
-  const p: Record<string, string> = { none: '', sm: 'p-4', md: 'p-6', lg: 'p-8' };
+export function Card({ className, padding = 'md', interactive = false, children, ...props }: CardProps) {
+  const p: Record<string, string> = {
+    none: '',
+    sm: 'p-5',
+    md: 'p-6 sm:p-7',
+    lg: 'p-7 sm:p-9',
+  };
   return (
     <div
       {...props}
-      className={cn('rounded-card bg-surface border border-border shadow-card', p[padding], className)}
+      className={cn(
+        'relative rounded-card border border-border/80 bg-surface shadow-card transition-[transform,box-shadow,border-color] duration-300',
+        interactive && 'hover:-translate-y-0.5 hover:border-green-mint/60 hover:shadow-lift',
+        p[padding],
+        className,
+      )}
     >
       {children}
     </div>
@@ -19,7 +30,11 @@ export function Card({ className, padding = 'md', children, ...props }: CardProp
 
 interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function CardHeader({ className, children, ...props }: CardHeaderProps) {
-  return <div {...props} className={cn('flex flex-col space-y-1.5 sm:space-y-0 sm:flex-row', className)}>{children}</div>;
+  return (
+    <div {...props} className={cn('flex flex-wrap items-start justify-between gap-x-4 gap-y-2', className)}>
+      {children}
+    </div>
+  );
 }
 
 interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
@@ -27,7 +42,7 @@ export function CardTitle({ className, children, ...props }: CardTitleProps) {
   return (
     <h3
       {...props}
-      className={cn('text-deep-green font-semibold text-sm sm:text-base tracking-tight', className)}
+      className={cn('text-[15px] font-semibold tracking-tight text-dark sm:text-base', className)}
     >
       {children}
     </h3>
@@ -37,10 +52,7 @@ export function CardTitle({ className, children, ...props }: CardTitleProps) {
 interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
 export function CardDescription({ className, children, ...props }: CardDescriptionProps) {
   return (
-    <p
-      {...props}
-      className={cn('text-secondary text-sm', className)}
-    >
+    <p {...props} className={cn('mt-1 text-[13px] leading-relaxed text-secondary', className)}>
       {children}
     </p>
   );
@@ -48,13 +60,13 @@ export function CardDescription({ className, children, ...props }: CardDescripti
 
 interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function CardContent({ className, children, ...props }: CardContentProps) {
-  return <div {...props} className={cn('mt-2 sm:mt-4', className)}>{children}</div>;
+  return <div {...props} className={cn('mt-5', className)}>{children}</div>;
 }
 
 interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function CardFooter({ className, children, ...props }: CardFooterProps) {
   return (
-    <div {...props} className={cn('mt-auto sm:mt-0 flex items-center', className)}>
+    <div {...props} className={cn('mt-auto flex items-center gap-2 pt-4', className)}>
       {children}
     </div>
   );

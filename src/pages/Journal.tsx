@@ -82,18 +82,18 @@ export function Journal() {
   const moodAvg = entries.length ? Math.round((entries.reduce((s, e) => s + e.mood, 0) / entries.length) * 10) / 10 : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Wellness Journal</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Wellness Journal</h1>
         <Button onClick={() => setAddOpen(true)} size="sm">
           <Plus size={16} strokeWidth={2} /> New Entry
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <StatCardSmall title="Entries" value={entries.length} sub="total" />
-        <StatCardSmall title="Avg Mood" value={moodAvg} sub="/5" />
-        <StatCardSmall title="Last Entry" value={entries.length ? entries[0].date : '—'} sub="most recent" />
+        <StatCardSmall title="Avg mood" value={entries.length ? `${moodAvg}/5` : '—'} sub="across all entries" />
+        <StatCardSmall title="Last entry" value={entries.length ? formatDateLong(entries[0].date) : '—'} sub="most recent" />
       </div>
 
       <div className="flex gap-4">
@@ -111,25 +111,25 @@ export function Journal() {
           <div className="space-y-3">
             {filtered.length ? (
               filtered.map((e) => (
-                <div key={e.id} className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-green-soft/50 transition-colors cursor-pointer" onClick={() => loadForEdit(e.id)}>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <span className="text-dark font-medium">{formatDateLong(e.date)}</span>
-                      <span className="text-[10px] text-secondary border border-border/50 rounded px-1.5">Mood {e.mood}/5</span>
+                <div key={e.id} className="flex flex-col gap-3 rounded-xl border border-border/70 bg-[#FBFDFB] p-3.5 transition-colors hover:border-green-mint/60 sm:flex-row sm:items-start sm:justify-between" onClick={() => loadForEdit(e.id)}>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[13.5px] font-medium text-dark">{formatDateLong(e.date)}</span>
+                      <span className="rounded-full bg-green-soft/80 px-2 py-0.5 text-[10.5px] font-medium text-green-deep">Mood {e.mood}/5</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[11px] text-secondary mt-1">
+                    <div className="mt-1 flex items-center gap-2 text-[12px] text-secondary">
                       <span>Energy {e.energy}/5</span>
                       <span>·</span>
                       <span>Sleep {e.sleepQuality}/5</span>
                     </div>
-                    {e.reflection && <p className="text-dark text-sm mt-2">{e.reflection}</p>}
+                    {e.reflection && <p className="mt-2 text-[12.5px] leading-relaxed text-dark">{e.reflection}</p>}
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex shrink-0 items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={(ev) => { ev.stopPropagation(); loadForEdit(e.id); }} title="Edit">
-                      <Edit2 size={16} strokeWidth={2} />
+                      <Edit2 size={15} strokeWidth={2} />
                     </Button>
                     <Button variant="outline" size="sm" onClick={(ev) => { ev.stopPropagation(); deleteEntry(e.id); }} title="Delete">
-                      <Trash2 size={16} strokeWidth={2} />
+                      <Trash2 size={15} strokeWidth={2} />
                     </Button>
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export function Journal() {
             <Input label="Date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] text-secondary uppercase">Mood</label>
+                <label className="text-[11px] text-secondary uppercase">Mood</label>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((v) => (
                     <button key={v} type="button" onClick={() => setForm({ ...form, mood: v })} className={`w-8 h-8 rounded-md text-xs font-medium border ${form.mood === v ? 'bg-green-deep text-white border-green-deep' : 'border-border text-secondary'}`}>{v}</button>
@@ -158,7 +158,7 @@ export function Journal() {
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] text-secondary uppercase">Energy</label>
+                <label className="text-[11px] text-secondary uppercase">Energy</label>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((v) => (
                     <button key={v} type="button" onClick={() => setForm({ ...form, energy: v })} className={`w-8 h-8 rounded-md text-xs font-medium border ${form.energy === v ? 'bg-green-deep text-white border-green-deep' : 'border-border text-secondary'}`}>{v}</button>
@@ -166,7 +166,7 @@ export function Journal() {
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] text-secondary uppercase">Sleep Quality</label>
+                <label className="text-[11px] text-secondary uppercase">Sleep Quality</label>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((v) => (
                     <button key={v} type="button" onClick={() => setForm({ ...form, sleepQuality: v })} className={`w-8 h-8 rounded-md text-xs font-medium border ${form.sleepQuality === v ? 'bg-green-deep text-white border-green-deep' : 'border-border text-secondary'}`}>{v}</button>
@@ -196,12 +196,12 @@ export function Journal() {
 
 function StatCardSmall({ title, value, sub }: { title: string; value: string | number; sub: string }) {
   return (
-    <Card className="h-24 flex flex-col justify-between p-4">
+    <Card padding="none" className="flex min-h-[112px] flex-col justify-between p-5">
       <div>
-        <p className="text-[10px] uppercase tracking-wider text-secondary">{title}</p>
-        <p className="text-deep-green font-bold text-lg">{value}</p>
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-secondary">{title}</p>
+        <p className="stat-number mt-2 text-xl font-semibold leading-tight text-dark">{value}</p>
       </div>
-      <p className="text-[10px] text-secondary">{sub}</p>
+      <p className="mt-2 text-[11.5px] leading-relaxed text-secondary">{sub}</p>
     </Card>
   );
 }

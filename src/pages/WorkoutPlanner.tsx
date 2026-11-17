@@ -3,7 +3,7 @@
  */
 
 import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
+import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -78,9 +78,9 @@ export function WorkoutPlanner() {
   const totalScheduled = plans.filter((p) => p.date >= weekStart && p.date <= weekDays[6].date).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Workout Planner</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Workout Planner</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={prevWeek}><ChevronLeft size={16} strokeWidth={2} /></Button>
           <span className="text-sm font-medium text-dark">{formatWeekRange(weekStart)}</span>
@@ -89,55 +89,68 @@ export function WorkoutPlanner() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Weekly Schedule</CardTitle>
-          <CardDescription>{completedCount} / {totalScheduled} completed this week</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ProgressBar value={totalScheduled ? Math.round((completedCount / totalScheduled) * 100) : 0} />
-        </CardContent>
+      <Card padding="md">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[15px] font-semibold text-dark">This week</p>
+            <p className="mt-0.5 text-[12.5px] text-secondary">
+              {totalScheduled
+                ? `${completedCount} of ${totalScheduled} planned workouts completed`
+                : 'No workouts planned yet — add one to any day below.'}
+            </p>
+          </div>
+          <span className="rounded-full bg-green-soft px-2.5 py-1 text-[11px] font-semibold text-green-deep">
+            {totalScheduled ? `${Math.round((completedCount / totalScheduled) * 100)}% done` : '0% done'}
+          </span>
+        </div>
+        <div className="mt-4">
+          <ProgressBar value={totalScheduled ? Math.round((completedCount / totalScheduled) * 100) : 0} height="7px" />
+        </div>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-7">
         {weekDays.map((day) => (
-          <div key={day.date} className="border border-border rounded-xl p-3 bg-surface flex flex-col h-full">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-semibold text-dark">{day.label}</span>
-                <span className="text-[10px] text-secondary">{day.date.slice(5)}</span>
-                {day.isToday && <span className="text-[9px] bg-green-primary text-white rounded-full px-1.5 mt-0.5">Today</span>}
+          <div
+            key={day.date}
+            className={`flex min-h-[176px] flex-col rounded-2xl border p-3 transition-colors ${day.isToday ? 'border-green-mint/80 bg-[#F6FCF8]' : 'border-border/70 bg-white'}`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-secondary">{day.label}</p>
+                <p className="stat-number mt-0.5 text-[15px] font-semibold leading-none text-dark">{Number(day.date.slice(8))}</p>
               </div>
-              <span className="text-xs font-medium">{dayPlans(day.date).length}</span>
+              {day.isToday && <span className="rounded-full bg-green-deep px-2 py-0.5 text-[9.5px] font-semibold text-white">Today</span>}
             </div>
-            <div className="flex-1 space-y-1.5 min-h-[200px]">
+            <div className="mt-2.5 flex-1 space-y-1.5">
               {dayPlans(day.date).length ? (
                 dayPlans(day.date).map((p) => (
-                  <div key={p.id} className={`flex items-center justify-between p-1.5 rounded-md text-xs ${
-                    p.status === 'completed' ? 'bg-green-soft text-green-deep border border-green-deep/50' :
-                    p.status === 'missed' ? 'bg-attention/10 text-attention border border-attention/50' :
-                    'bg-surface border border-border text-secondary'
-                  }`}>
-                    <span className="flex-1 truncate">{p.name}</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => updateStatus(p.id, p.status === 'completed' ? 'planned' : 'completed')}
-                      className={`w-5 h-5 p-0 rounded-full ${p.status === 'completed' ? 'bg-green-deep border-green-deep' : ''}`}
-                    >
-                      <CheckCircle2 size={10} strokeWidth={2} fill={p.status === 'completed' ? 'white' : 'none'} />
-                    </Button>
-                  </div>
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => updateStatus(p.id, p.status === 'completed' ? 'planned' : 'completed')}
+                    title={p.status === 'completed' ? 'Mark as planned' : 'Mark as completed'}
+                    className={`flex w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-left text-[11px] transition-colors ${
+                      p.status === 'completed' ? 'border-green-mint/70 bg-green-soft text-green-deep' :
+                      p.status === 'missed' ? 'border-attention/40 bg-attention/5 text-attention' :
+                      'border-border/70 bg-white text-dark hover:border-green-mint/70'
+                    }`}
+                  >
+                    <CheckCircle2 size={12} strokeWidth={2} fill={p.status === 'completed' ? '#0A6B3E' : 'none'} className="shrink-0" />
+                    <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                    <span className="shrink-0 text-[10px] font-medium opacity-70">{p.durationMin}m</span>
+                  </button>
                 ))
               ) : (
-                <div className="text-[10px] text-secondary/40 text-center py-2">Rest</div>
+                <p className="rounded-lg border border-dashed border-border/80 px-2 py-2.5 text-center text-[10.5px] text-secondary/70">Rest day</p>
               )}
-              <div className="pt-1">
-                <Button variant="outline" size="sm" onClick={() => { setPlanForm({ ...planForm, date: day.date }); setAddOpen(true); }} className="w-full text-[10px] px-1.5 py-1">
-                  + Add workout
-                </Button>
-              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => { setPlanForm({ ...planForm, date: day.date }); setAddOpen(true); }}
+              className="mt-2 inline-flex items-center justify-center gap-1 rounded-lg border border-dashed border-green-mint/70 py-1.5 text-[11px] font-medium text-green-deep transition-colors hover:bg-green-soft/60"
+            >
+              <Plus size={12} strokeWidth={2.2} /> Add workout
+            </button>
           </div>
         ))}
       </div>
@@ -161,7 +174,7 @@ export function WorkoutPlanner() {
         </Modal>
       )}
 
-      <p className="text-[11px] text-secondary">Rest days are encouraged — you don't need to work out every day.</p>
+      <p className="text-[12px] text-secondary">Rest days are encouraged — you don't need to work out every day.</p>
     </div>
   );
 

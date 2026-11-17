@@ -18,15 +18,15 @@ interface SelectProps {
 
 export function Select({ value, onChange, options, label, placeholder = 'Select...', className }: SelectProps) {
   return (
-    <div className="w-full space-y-1">
-      {label && <label className="text-dark text-sm font-medium block">{label}</label>}
+    <div className="w-full space-y-1.5">
+      {label && <label className="block text-[13px] font-medium text-dark">{label}</label>}
       <div className="relative">
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            'flex h-10 w-full items-center justify-between rounded-md border border-border bg-surface px-3 py-2 text-dark text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-mint disabled:cursor-not-allowed disabled:opacity-50',
-            className
+            'h-11 w-full cursor-pointer appearance-none rounded-control border border-border bg-white pl-3.5 pr-10 text-sm text-dark shadow-[inset_0_1px_2px_rgba(16,40,28,0.03)] transition-all duration-200 hover:border-green-sage focus-visible:border-green-mint focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-mint/30 disabled:cursor-not-allowed disabled:opacity-50',
+            className,
           )}
         >
           <option value="" disabled>{placeholder}</option>
@@ -36,7 +36,7 @@ export function Select({ value, onChange, options, label, placeholder = 'Select.
             </option>
           ))}
         </select>
-        <ChevronDown size={16} strokeWidth={2} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none" />
+        <ChevronDown size={16} strokeWidth={2} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-secondary" />
       </div>
     </div>
   );
@@ -48,7 +48,7 @@ interface ButtonGroupProps {
 }
 
 export function ButtonGroup({ children, className }: ButtonGroupProps) {
-  return <div className={cn('inline-flex items-center rounded-md border border-border bg-surface shadow-sm', className)}>{children}</div>;
+  return <div className={cn('inline-flex items-center rounded-control border border-border bg-white p-1 shadow-card', className)}>{children}</div>;
 }
 
 interface SearchFilterProps {
@@ -60,7 +60,7 @@ export function SearchFilter({ onSearch, placeholder = 'Search...' }: SearchFilt
   const [value, setValue] = React.useState('');
   return (
     <div className="relative w-full max-w-md">
-      <Search size={18} strokeWidth={2} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
+      <Search size={17} strokeWidth={2} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary" />
       <input
         value={value}
         onChange={(e) => {
@@ -68,7 +68,7 @@ export function SearchFilter({ onSearch, placeholder = 'Search...' }: SearchFilt
           onSearch(e.target.value);
         }}
         placeholder={placeholder}
-        className="pl-10 h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-dark text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-mint"
+        className="h-11 w-full rounded-control border border-border bg-white pl-10 pr-3.5 text-sm text-dark shadow-[inset_0_1px_2px_rgba(16,40,28,0.03)] transition-all duration-200 placeholder:text-secondary/55 hover:border-green-sage focus-visible:border-green-mint focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-mint/30"
       />
     </div>
   );

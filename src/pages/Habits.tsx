@@ -13,7 +13,7 @@ import { ProgressBar } from '../components/ui/Progress';
 import { db } from '../db';
 import { allHabitsCompletion } from '../services/calculations';
 import { today, addDays, type Habit } from '../types';
-import { Plus, CheckCircle2, Activity, Moon, Droplet } from 'lucide-react';
+import { Plus, CheckCircle2, Activity, Moon, Droplet, Flame } from 'lucide-react';
 import { success, error } from '../services/toast';
 
 const HABIT_CATEGORIES: Array<{ value: string; label: string; icon: React.ElementType }> = [
@@ -51,6 +51,7 @@ export function Habits() {
   }, []);
 
   const active = habits.filter((h) => !h.isArchived);
+  const archived = habits.filter((h) => h.isArchived);
   const progress = allHabitsCompletion(habits, habitEntries, 7);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,118 +100,156 @@ export function Habits() {
   const colors = ['#2E9D59', '#176B3A', '#A8DDB5', '#E7BB59', '#319B61', '#718078'];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Habits</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Habits</h1>
         <Button onClick={() => setAddOpen(true)} size="sm">
           <Plus size={16} strokeWidth={2} /> Add Habit
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        {active.map((h) => {
-          const p = progress.find((x) => x.id === h.id);
-          const done = isCompletedToday(h.id);
-          return (
-            <Card key={h.id} className="cursor-pointer" onClick={() => toggleHabit(h.id, today(), done)}>
-              <CardHeader className="pb-2 flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-sm flex items-center gap-1">
-                    {done ? <CheckCircle2 size={16} strokeWidth={2} fill="white" className="bg-green-deep rounded-full p-0.5" /> : <span className="w-4 h-4 border-2 rounded-full border-current" />}
-                    {h.name}
-                  </CardTitle>
-                  <CardDescription className="text-[10px]">{h.category}</CardDescription>
+      {active.length === 0 ? (
+        <Card padding="lg" className="overflow-hidden">
+          <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-xl">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-green-soft text-green-deep">
+                <Activity size={22} strokeWidth={1.9} />
+              </span>
+              <h2 className="mt-4 text-lg font-semibold tracking-tight text-dark">Build momentum with small daily habits</h2>
+              <p className="mt-2 text-[13px] leading-relaxed text-secondary">
+                Track water, movement, sleep or anything you choose. Multiple check-ins in one day count as a single streak day, and missing a day never erases your history.
+              </p>
+            </div>
+            <Button onClick={() => setAddOpen(true)} className="shrink-0">
+              <Plus size={16} strokeWidth={2} /> Create your first habit
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {active.map((h) => {
+            const p = progress.find((x) => x.id === h.id);
+            const done = isCompletedToday(h.id);
+            return (
+              <Card
+                key={h.id}
+                interactive
+                padding="md"
+                className={done ? 'border-green-mint/70 bg-[#F6FCF8]' : undefined}
+                onClick={() => toggleHabit(h.id, today(), done)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span
+                      className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors ${done ? 'bg-green-deep text-white' : 'bg-green-soft text-green-deep'}`}
+                    >
+                      {done ? <CheckCircle2 size={19} strokeWidth={2.2} /> : <span className="h-4 w-4 rounded-full border-2 border-current" />}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[14px] font-semibold text-dark">{h.name}</p>
+                      <p className="mt-0.5 text-[11.5px] capitalize text-secondary">{h.category}</p>
+                    </div>
+                  </div>
+                  <span className="stat-number shrink-0 text-[15px] font-semibold text-green-deep">{p?.pct ?? 0}%</span>
                 </div>
-                <span className="text-green-deep font-bold text-sm">{p?.pct ?? 0}%</span>
-              </CardHeader>
-              <CardContent>
-                <ProgressBar value={p?.pct ?? 0} color={h.color} />
-                <div className="flex justify-between text-[10px] text-secondary mt-2">
-                  <span>Streak: {p?.streak ?? 0} days</span>
-                  <span>{p?.completed ?? 0}/7</span>
+                <div className="mt-4">
+                  <ProgressBar value={p?.pct ?? 0} height="7px" />
+                  <div className="mt-3 flex items-center justify-between text-[11.5px] text-secondary">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Flame size={12} strokeWidth={2} />
+                      {p?.streak ?? 0} day streak
+                    </span>
+                    <span>{p?.completed ?? 0}/7 this week</span>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-        {active.length === 0 && (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center text-center py-8">
-              <Activity size={32} strokeWidth={1} className="mb-2 opacity-40" />
-              <p className="text-secondary">No habits yet. Add your first habit.</p>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {(active.length > 0 || archived.length > 0) && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Habit list with weekly calendar */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <div>
+                <CardTitle>Your habits</CardTitle>
+                <CardDescription>Last 7 days · tap a day to toggle it</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2.5">
+                {active.map((h) => {
+                  const p = progress.find((x) => x.id === h.id);
+                  const weekDays = getLast7Days();
+                  return (
+                    <div key={h.id} className="flex flex-col gap-3 rounded-xl border border-border/70 bg-[#FBFDFB] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: h.color }} />
+                          <span className="truncate text-[13.5px] font-medium text-dark">{h.name}</span>
+                          <span className="shrink-0 rounded-full border border-border/70 px-2 py-0.5 text-[10.5px] capitalize text-secondary">{h.category}</span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-2 text-[12px] text-secondary">
+                          <span>{p?.pct ?? 0}% this week</span>
+                          <span>·</span>
+                          <span>{p?.streak ?? 0} day streak</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {weekDays.map((d) => {
+                          const e = habitEntries.find((x) => x.habitId === h.id && x.date === d);
+                          return (
+                            <button
+                              key={d}
+                              onClick={() => toggleHabit(h.id, d, !!e?.completed)}
+                              aria-label={`${h.name} on ${d}`}
+                              title={new Date(d + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                              className={`grid h-7 w-7 place-items-center rounded-full border transition-colors ${e?.completed ? 'border-green-deep bg-green-deep text-white' : 'border-border bg-white text-transparent hover:border-green-mint hover:bg-green-soft/60'}`}
+                            >
+                              <CheckCircle2 size={13} strokeWidth={2.4} />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+                {active.length === 0 && <p className="py-6 text-center text-[12.5px] text-secondary">No active habits. Restore one from the panel beside this card.</p>}
+              </div>
             </CardContent>
           </Card>
-        )}
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Habit list with weekly calendar */}
-        <Card lg:col-span-2>
-          <CardHeader>
-            <CardTitle>Your Habits</CardTitle>
-            <CardDescription>Last 7 days · tap to toggle today</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {active.map((h) => {
-                const p = progress.find((x) => x.id === h.id);
-                const weekDays = getLast7Days();
-                return (
-                  <div key={h.id} className="flex items-center justify-between p-2 rounded-md hover:bg-green-soft/50">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-dark" style={{ color: h.color }}>{h.name}</span>
-                        <span className="text-[10px] text-secondary border border-border/50 rounded px-1.5">{h.category}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-[11px] text-secondary mt-1">
-                        <span>{p?.pct ?? 0}% this week</span>
-                        <span>·</span>
-                        <span>streak {p?.streak ?? 0}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {weekDays.map((d) => {
-                        const e = habitEntries.find((x) => x.habitId === h.id && x.date === d);
-                        return (
-                          <button
-                            key={d}
-                            onClick={() => toggleHabit(h.id, d, !!e?.completed)}
-                            className={`w-5 h-5 rounded-full ${e?.completed ? 'bg-green-deep text-white border-green-deep' : 'border border-border text-secondary hover:bg-green-soft/50'}`}
-                          >
-                            {e?.completed && <CheckCircle2 size={10} strokeWidth={2} fill="white" />}
-                          </button>
-                        );
-                      })}
+          {/* Archive / manage */}
+          <Card className="lg:col-span-1 self-start">
+            <CardHeader>
+              <div>
+                <CardTitle>Archived</CardTitle>
+                <CardDescription>Restore or delete old habits</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {archived.map((h) => (
+                  <div key={h.id} className="flex items-center justify-between gap-2 rounded-xl border border-border/70 bg-[#FBFDFB] p-2.5">
+                    <span className="truncate text-[12.5px] text-secondary line-through">{h.name}</span>
+                    <div className="flex shrink-0 gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => db.habits.update(h.id, { isArchived: false }).then(() => db.habits.list()).then((hh) => setHabits(hh))}>Restore</Button>
+                      <Button variant="outline" size="sm" onClick={() => deleteHabit(h.id)}>Delete</Button>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Archive / manage */}
-        <Card lg:col-span-1>
-          <CardHeader>
-            <CardTitle>Manage</CardTitle>
-            <CardDescription>Archive or delete habits</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {habits.filter((h) => h.isArchived).map((h) => (
-                <div key={h.id} className="flex items-center justify-between p-2 rounded-md bg-attention/20 text-sm">
-                  <span className="line-through text-secondary">{h.name}</span>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => db.habits.update(h.id, { isArchived: false }).then(() => db.habits.list()).then((hh) => setHabits(hh))}>Restore</Button>
-                    <Button variant="outline" size="sm" onClick={() => deleteHabit(h.id)}>Delete</Button>
-                  </div>
-                </div>
-              ))}
-              {habits.filter((h) => h.isArchived).length === 0 && <p className="text-secondary text-xs text-center">No archived habits.</p>}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                ))}
+                {archived.length === 0 && (
+                  <p className="rounded-xl border border-dashed border-border bg-[#FBFDFB] px-3 py-6 text-center text-[12.5px] text-secondary">
+                    Nothing archived yet.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {addOpen && (
         <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add Habit" description="Create a new habit to track daily.">
@@ -227,7 +266,7 @@ export function Habits() {
                 />
               ))}
             </div>
-            <div className="text-[11px] text-secondary">Missing a day won't reset your streak or history.</div>
+            <div className="text-[12px] text-secondary">Missing a day won't reset your streak or history.</div>
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
               <Button type="submit">Create Habit</Button>

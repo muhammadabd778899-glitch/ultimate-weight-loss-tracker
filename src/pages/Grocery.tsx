@@ -10,7 +10,7 @@ import { Input } from '../components/ui/Input';
 import { Select, SearchFilter } from '../components/ui/Select';
 import { Modal } from '../components/ui/Modal';
 import { db } from '../db';
-import { Plus, ShoppingCart, CheckCircle2, Trash2, Edit2, Delete } from 'lucide-react';
+import { Plus, ShoppingCart, Check, Trash2, Edit2, Delete } from 'lucide-react';
 import { success, error } from '../services/toast';
 
 export function Grocery() {
@@ -111,9 +111,9 @@ export function Grocery() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Grocery List</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Grocery List</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={clearCompleted} disabled={purchasedCount === 0} size="sm">
             <Delete size={16} strokeWidth={2} /> Clear Purchased ({purchasedCount})
@@ -124,14 +124,14 @@ export function Grocery() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCardSmall title="Estimated" value={`$${totalEstimated.toFixed(2)}`} sub="Total" />
         <StatCardSmall title="Actual Spent" value={`$${totalActual.toFixed(2)}`} sub="Purchased" />
         <StatCardSmall title="Items" value={filtered.length} sub={showPurchased ? 'shown' : 'pending'} />
         <StatCardSmall title="Purchased" value={purchasedCount} sub="checked off" />
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row md:items-end gap-4">
         <div className="flex-1">
           <SearchFilter onSearch={setSearch} placeholder="Search items..." />
         </div>
@@ -144,9 +144,9 @@ export function Grocery() {
             placeholder="All"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={showPurchased} onChange={(e) => setShowPurchased(e.target.checked)} />
+        <div className="flex items-center gap-2 md:pb-2.5">
+          <label className="flex cursor-pointer items-center gap-2 text-[12.5px] text-secondary">
+            <input type="checkbox" checked={showPurchased} onChange={(e) => setShowPurchased(e.target.checked)} className="h-4 w-4 accent-[#169C5C]" />
             Show purchased
           </label>
         </div>
@@ -158,28 +158,28 @@ export function Grocery() {
           <CardDescription>Check items off as you shop.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {filtered.length ? (
               filtered.map((it) => (
-                <div key={it.id} className="flex items-center justify-between p-3 rounded-md border border-border bg-surface hover:bg-green-soft/50 transition-colors">
-                  <div className="flex items-center gap-3 flex-1">
+                <div key={it.id} className={`flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 transition-colors ${it.purchased ? 'border-border/60 bg-[#F7F9F7]' : 'border-border/70 bg-[#FBFDFB]'}`}>
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     <button
                       onClick={() => togglePurchased(it.id, it.purchased)}
-                      className={`rounded-full border-2 p-1.5 transition-all ${it.purchased ? 'border-green-deep bg-green-deep' : 'border-border'}`}
+                      aria-label={it.purchased ? `Mark ${it.name} as pending` : `Mark ${it.name} as purchased`}
+                      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-colors ${it.purchased ? 'border-green-deep bg-green-deep text-white' : 'border-border bg-white text-transparent hover:border-green-mint'}`}
                     >
-                      {it.purchased ? <CheckCircle2 size={16} strokeWidth={2} fill="white" /> : <span className="w-4 h-4 border-2 rounded-full border-current" />}
+                      <Check size={13} strokeWidth={3} />
                     </button>
-                    <div className="flex-1 min-w-0">
-                      <div className={`text-sm ${it.purchased ? 'line-through text-secondary' : 'text-dark font-medium'}`}>{it.name}</div>
-                      <div className="flex items-center gap-2 text-[11px] text-secondary">
-                        <span>{it.category}</span>
-                        <span>· {it.quantity} {it.unit}</span>
-                        {it.estimatedPrice && <span>· est. ${Number(it.estimatedPrice).toFixed(2)}</span>}
-                      </div>
-                      {it.notes && <div className="text-[11px] text-secondary mt-0.5">{it.notes}</div>}
+                    <div className="min-w-0">
+                      <p className={`truncate text-[13.5px] ${it.purchased ? 'text-secondary line-through' : 'font-medium text-dark'}`}>{it.name}</p>
+                      <p className="mt-0.5 text-[11.5px] leading-snug text-secondary">
+                        {it.category} · {it.quantity} {it.unit}
+                        {it.estimatedPrice ? ` · est. $${Number(it.estimatedPrice).toFixed(2)}` : ''}
+                      </p>
+                      {it.notes && <p className="mt-0.5 truncate text-[11.5px] text-secondary/80">{it.notes}</p>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); loadForEdit(it.id); }} title="Edit">
                       <Edit2 size={16} strokeWidth={2} />
                     </Button>
@@ -190,7 +190,7 @@ export function Grocery() {
                 </div>
               ))
             ) : (
-              <div className="text-secondary text-center py-8">
+              <div className="col-span-full text-secondary text-center py-8">
                 <ShoppingCart size={32} strokeWidth={1} className="mb-2 opacity-40" />
                 <p>No grocery items yet.</p>
               </div>
@@ -226,10 +226,10 @@ function StatCardSmall({ title, value, sub }: { title: string; value: string | n
   return (
     <Card className="h-24 flex flex-col justify-between p-4">
       <div>
-        <p className="text-[10px] uppercase tracking-wider text-secondary">{title}</p>
+        <p className="text-[11px] uppercase tracking-wider text-secondary">{title}</p>
         <p className="text-deep-green font-bold text-lg">{value}</p>
       </div>
-      <p className="text-[10px] text-secondary">{sub}</p>
+      <p className="text-[11px] text-secondary">{sub}</p>
     </Card>
   );
 }

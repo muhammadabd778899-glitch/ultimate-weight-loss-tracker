@@ -135,9 +135,9 @@ export function MealPlanner() {
   const nextWeek = () => setWeekStart(addDaysStr(weekStart, 7));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Meal Planner</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Meal Planner</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={prevWeek}><ChevronLeft size={16} strokeWidth={2} /></Button>
           <span className="text-sm font-medium text-dark">{formatWeekRange(weekStart)}</span>
@@ -146,64 +146,75 @@ export function MealPlanner() {
         </div>
       </div>
 
-      <Card>
+      <Card padding="md">
         <CardHeader>
-          <CardTitle>Weekly Planning</CardTitle>
-          <CardDescription>{completion()}% of meal slots filled this week</CardDescription>
+          <div>
+            <CardTitle>This week</CardTitle>
+            <CardDescription>{filledSlots()} of {weekDays.length * 4} meal slots filled</CardDescription>
+          </div>
+          <span className="rounded-full bg-green-soft px-3 py-1.5 text-[12px] font-semibold text-green-deep">{completion()}% planned</span>
         </CardHeader>
         <CardContent>
-          <ProgressBar value={completion()} />
+          <ProgressBar value={completion()} height="6px" />
+          <div className="mt-5 -mx-1 overflow-x-auto pb-1">
+            <div className="grid min-w-[900px] grid-cols-7 gap-2.5 px-1">
+              {weekDays.map((day) => (
+                <div
+                  key={day.date}
+                  className={`flex flex-col rounded-2xl border p-2 ${day.isToday ? 'border-green-mint bg-green-soft/40' : 'border-border/70 bg-[#FBFDFB]'}`}
+                >
+                  <div className="flex items-start justify-between gap-1 px-0.5 pb-1.5">
+                    <div>
+                      <p className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-secondary">{day.label}</p>
+                      <p className={`stat-number text-[15px] font-semibold leading-tight ${day.isToday ? 'text-green-deep' : 'text-dark'}`}>{day.date.slice(8)}</p>
+                    </div>
+                    {day.isToday && <span className="rounded-full bg-green-deep px-1.5 py-0.5 text-[8.5px] font-semibold uppercase tracking-wide text-white">Today</span>}
+                  </div>
+
+                  <div className="space-y-1">
+                    {MEAL_CATEGORIES.map((cat) => {
+                      const plans = dayPlans(day.date, cat.value);
+                      return (
+                        <div key={cat.value} className="rounded-lg border border-transparent px-1.5 py-1 transition-colors hover:border-border hover:bg-white">
+                          <button
+                            type="button"
+                            onClick={() => openSlot(day.date, cat.value)}
+                            className="flex w-full items-center justify-between gap-1 text-left"
+                          >
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-secondary/80">{cat.label}</span>
+                            <Plus size={11} strokeWidth={2.2} className="text-secondary/40" />
+                          </button>
+                          {plans.length ? plans.map((p) => (
+                            <div key={p.id} className="mt-1 rounded-md bg-green-soft/80 px-1.5 py-1">
+                              <p className="truncate text-[10.5px] font-medium leading-snug text-dark">{p.type === 'recipe' ? p.recipeName : p.customName}</p>
+                              <div className="mt-0.5 flex items-center justify-between gap-1">
+                                <span className="text-[9px] text-secondary">{Math.round(p.calories || 0)} cal</span>
+                                <button type="button" onClick={() => removePlan(p.id)} className="text-secondary/60 transition-colors hover:text-[#C25241]" aria-label="Remove planned meal">
+                                  <Trash2 size={10} strokeWidth={2} />
+                                </button>
+                              </div>
+                            </div>
+                          )) : <p className="mt-1 text-[9.5px] italic text-secondary/45">Empty</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => duplicateDay(day.date, addDaysStr(day.date, 7))}
+                    className="mt-auto flex items-center justify-center gap-1 rounded-lg pt-2.5 text-[9.5px] font-medium text-secondary transition-colors hover:text-green-deep"
+                  >
+                    <Copy size={10} strokeWidth={2} /> Copy to next week
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Weekly grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-[10px] text-secondary uppercase">Time</span>
-          {MEAL_CATEGORIES.map((c) => (
-            <span key={c.value} className="text-[10px] text-secondary uppercase">{c.label.slice(0, 3)}</span>
-          ))}
-        </div>
-        {weekDays.map((day) => (
-          <div key={day.date} className="flex flex-col gap-1 border border-border rounded-lg p-2 bg-surface hover:bg-green-soft/30 transition-colors">
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[10px] font-semibold text-dark">{day.label}</span>
-              <span className="text-[10px] text-secondary">{day.date.slice(5)}</span>
-              {day.isToday && <span className="text-[9px] bg-green-primary text-white rounded-full px-1.5">Today</span>}
-            </div>
-            {MEAL_CATEGORIES.map((cat) => (
-              <div
-                key={cat.value}
-                className="flex items-center justify-between p-1.5 rounded-md cursor-pointer transition-colors hover:bg-green-soft/50"
-                onClick={() => {
-                  setPlanForm({ ...planForm, date: day.date, mealCategory: cat.value });
-                  setAddOpen(true);
-                }}
-              >
-                <div className="flex-1 min-w-0">
-                  {dayPlans(day.date, cat.value).map((p) => (
-                    <div key={p.id} className="text-[10px] leading-tight mb-0.5 truncate">
-                      {p.type === 'recipe' ? p.recipeName : p.customName}
-                      <span className="text-[9px] text-secondary block">{Math.round(p.calories || 0)} cal</span>
-                    </div>
-                  ))}
-                  {dayPlans(day.date, cat.value).length === 0 && <span className="text-[9px] text-secondary/50 italic">—</span>}
-                </div>
-                <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); removePlan(dayPlans(day.date, cat.value)[0]?.id || ''); }} disabled={!dayPlans(day.date, cat.value).length}>
-                  <Trash2 size={12} strokeWidth={2} />
-                </Button>
-              </div>
-            ))}
-            <div className="flex items-center justify-between p-1.5">
-              <Button variant="outline" size="sm" onClick={() => duplicateDay(day.date, addDaysStr(day.date, 7))}>
-                <Copy size={12} strokeWidth={2} />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex justify-end gap-2 mt-2">
+      <div className="flex justify-end">
         <Button variant="outline" onClick={generateGrocery} size="sm">
           <ShoppingCart size={16} strokeWidth={2} /> Generate Grocery List
         </Button>
@@ -233,6 +244,15 @@ export function MealPlanner() {
       )}
     </div>
   );
+
+  function openSlot(date: string, mealCategory: string) {
+    setPlanForm((prev) => ({ ...prev, date, mealCategory }));
+    setAddOpen(true);
+  }
+
+  function filledSlots() {
+    return mealPlans.filter((p) => p.date >= weekStart && p.date <= weekDays[6].date).length;
+  }
 
   function dayPlans(date: string, cat: string) {
     return (plansByDay[date] || [])
@@ -300,5 +320,5 @@ function formatWeekRange(weekStart: string): string {
   const d = new Date(weekStart + 'T12:00:00');
   const end = new Date(d);
   end.setDate(d.getDate() + 6);
-  return `${formatShort(weekStart)} – ${`${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`}`;
+  return `${formatShort(weekStart)} – ${formatShort(formatDate(end))}, ${end.getFullYear()}`;
 }

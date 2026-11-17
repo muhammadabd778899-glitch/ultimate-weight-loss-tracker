@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CheckCircle2, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
 import { cn } from './utils';
 
 interface ToastItemProps {
@@ -19,47 +19,32 @@ const ICONS: Record<string, React.ElementType> = {
   info: Info,
 };
 
-const COLORS: Record<string, string> = {
-  success: 'text-success bg-success/10 border-success/20',
-  error: 'text-attention bg-attention/10 border-attention/20',
-  warning: 'text-warning bg-warning/10 border-warning/20',
-  info: 'text-green-deep bg-green-soft border-green-deep/20',
+const ACCENTS: Record<string, string> = {
+  success: 'bg-[#E9F7EE] text-[#0A6B3E]',
+  error: 'bg-[#FCEDEA] text-[#C25241]',
+  warning: 'bg-[#FCF4E4] text-[#A9741F]',
+  info: 'bg-[#EAF1FB] text-[#3457A6]',
 };
 
 export function ToastItem({ toast, onDismiss }: ToastItemProps) {
   const Icon = ICONS[toast.type] || Info;
   return (
-    <div
-      className={cn(
-        'flex items-start gap-3 rounded-md border p-4 shadow-lg animate-toast-in',
-        COLORS[toast.type]
-      )}
-    >
-      <Icon size={20} strokeWidth={2} />
-      <div className="flex-1 min-w-0">
-        <h4 className="text-dark font-semibold text-sm">{toast.title}</h4>
-        {toast.message && <p className="text-secondary text-xs mt-1">{toast.message}</p>}
+    <div className="flex items-start gap-3 rounded-2xl border border-border bg-white p-4 shadow-[0_20px_45px_-22px_rgba(11,61,38,0.45)] animate-toast-in">
+      <span className={cn('grid h-9 w-9 shrink-0 place-items-center rounded-xl', ACCENTS[toast.type])}>
+        <Icon size={18} strokeWidth={2} />
+      </span>
+      <div className="min-w-0 flex-1 pt-0.5">
+        <h4 className="text-sm font-semibold text-dark">{toast.title}</h4>
+        {toast.message && <p className="mt-1 text-xs leading-relaxed text-secondary">{toast.message}</p>}
       </div>
-      <button onClick={onDismiss} className="rounded-md p-1.5 hover:bg-current/10 text-secondary">
-        <XIcon size={16} strokeWidth={2} />
+      <button
+        onClick={onDismiss}
+        className="-mr-1 -mt-1 rounded-full p-1.5 text-secondary transition-colors hover:bg-black/[0.05] hover:text-dark"
+        aria-label="Dismiss notification"
+      >
+        <X size={15} strokeWidth={2} />
       </button>
     </div>
-  );
-}
-
-function XIcon({ size, strokeWidth }: { size: number; strokeWidth: number }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
   );
 }
 
@@ -70,9 +55,9 @@ interface ToastContainerProps {
 
 export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <div className="pointer-events-none fixed inset-x-4 top-24 z-[60] flex flex-col items-end gap-2 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm">
       {toasts.map((t) => (
-        <div key={t.id} className="pointer-events-auto w-full max-w-sm">
+        <div key={t.id} className="pointer-events-auto w-full">
           <ToastItem toast={t} onDismiss={() => onDismiss(t.id)} />
         </div>
       ))}

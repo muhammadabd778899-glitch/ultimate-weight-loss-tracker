@@ -81,11 +81,11 @@ export function ProgressPhotos() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Progress Photos</h1>
-        <Button onClick={() => setCompareMode(false)} size="sm">
-          <RefreshCw size={16} strokeWidth={2} /> Clear Comparison
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Progress Photos</h1>
+        <Button variant="outline" onClick={() => setCompareMode(false)} size="sm" disabled={compareIds.length === 0} title="Clear the current comparison selection">
+          <RefreshCw size={16} strokeWidth={2} /> Clear comparison
         </Button>
       </div>
 
@@ -97,7 +97,7 @@ export function ProgressPhotos() {
       </div>
 
       <div className="border border-border rounded-lg p-4 bg-surface/50">
-        <p className="text-[11px] text-secondary mb-3">Photos remain in your browser's local storage (IndexedDB). They are never uploaded to a server. This app does not analyze body images.</p>
+        <p className="text-[12px] text-secondary mb-3">Photos remain in your browser's local storage (IndexedDB). They are never uploaded to a server. This app does not analyze body images.</p>
         {storageMB > 50 && <div className="text-attention text-xs font-medium">Storage usage is high ({storageMB} MB). Consider exporting a backup or removing old photos.</div>}
       </div>
 
@@ -112,7 +112,7 @@ export function ProgressPhotos() {
           <label className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-dashed border-border bg-green-soft/50 text-green-deep hover:bg-green-mint transition-colors cursor-pointer" htmlFor="photo-upload">
             <Image size={32} strokeWidth={2} className="mb-1" />
             <p className="text-sm font-medium">Choose photo</p>
-            <p className="text-[11px] text-secondary">JPEG or PNG</p>
+            <p className="text-[12px] text-secondary">JPEG or PNG</p>
           </label>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Input label="Date" type="date" id="photo-date" defaultValue={today()} />
@@ -142,7 +142,7 @@ export function ProgressPhotos() {
                 return (
                   <div key={id} className="flex flex-col gap-2">
                     <img src={p.imageDataUrl} alt="progress" className="w-full h-48 object-cover rounded-lg border border-border" />
-                    <p className="text-[11px] text-secondary">{p.date}</p>
+                    <p className="text-[12px] text-secondary">{p.date}</p>
                   </div>
                 );
               })}
@@ -178,13 +178,14 @@ export function ProgressPhotos() {
                       </Button>
                     </div>
                   </div>
-                  <p className="text-[11px] text-secondary text-center mt-1">{p.date}</p>
+                  <p className="text-[12px] text-secondary text-center mt-1">{p.date}</p>
                 </div>
               ))
             ) : (
-              <div className="text-secondary text-center py-10">
+              <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-[#FBFDFB] py-10 text-center text-secondary">
                 <Image size={32} strokeWidth={1} className="mb-2 opacity-40" />
-                <p>No photos yet. Add your first progress photo.</p>
+                <p className="text-[13px] font-medium text-dark">No photos yet</p>
+                <p className="mt-1 text-[12px]">Add your first progress photo above.</p>
               </div>
             )}
           </div>
@@ -227,10 +228,10 @@ function StatCardSmall({ title, value, sub }: { title: string; value: string | n
   return (
     <Card className="h-24 flex flex-col justify-between p-4">
       <div>
-        <p className="text-[10px] uppercase tracking-wider text-secondary">{title}</p>
+        <p className="text-[11px] uppercase tracking-wider text-secondary">{title}</p>
         <p className="text-deep-green font-bold text-lg">{value}</p>
       </div>
-      <p className="text-[10px] text-secondary">{sub}</p>
+      <p className="text-[11px] text-secondary">{sub}</p>
     </Card>
   );
 }

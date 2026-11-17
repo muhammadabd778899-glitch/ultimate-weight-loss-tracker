@@ -74,6 +74,13 @@ export function Nutrition() {
   const proteinTarget = 120;
   const carbsTarget = 250;
   const fatTarget = 67;
+  const waterPct = Math.min(100, Math.round((waterToday / waterTarget) * 100));
+  const waterLogs = waterEntries.filter((w) => w.date === date).length;
+  const macroData = [
+    { name: 'Protein', value: totals.protein * 4, grams: totals.protein, color: '#169C5C' },
+    { name: 'Carbs', value: totals.carbs * 4, grams: totals.carbs, color: '#7BD3A0' },
+    { name: 'Fat', value: totals.fat * 9, grams: totals.fat, color: '#0A6B3E' },
+  ].filter((d) => d.value > 0);
 
   const handleMealSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,6 +154,17 @@ export function Nutrition() {
     }
   };
 
+  const quickAddWater = async (amount: number) => {
+    try {
+      await db.water.add({ date, amountMl: amount, notes: '' });
+      const w = await db.water.list();
+      setWaterEntries(w);
+      success(`Added ${amount} ml of water`);
+    } catch (err) {
+      error('Failed to log water', err instanceof Error ? err.message : String(err));
+    }
+  };
+
   const loadMealForEdit = async (id: string) => {
     const entry = await db.meals.get(id);
     if (!entry) return;
@@ -162,9 +180,9 @@ export function Nutrition() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Nutrition</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Nutrition</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setWaterOpen(true)} size="sm">
             <Droplet size={16} strokeWidth={2} /> Water
@@ -175,13 +193,14 @@ export function Nutrition() {
         </div>
       </div>
 
-      <Input
-        label="Date"
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="w-48"
-      />
+      <div className="max-w-[220px]">
+        <Input
+          label="Date"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+      </div>
 
       {/* Daily totals cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -193,61 +212,94 @@ export function Nutrition() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Macro breakdown */}
-        <Card lg:col-span-2>
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Macro Distribution</CardTitle>
-            <CardDescription>Share of calories from protein, carbs, fat</CardDescription>
+            <div>
+              <CardTitle>Macro distribution</CardTitle>
+              <CardDescription>Share of calories from protein, carbs, fat</CardDescription>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="h-72">
-              {totals.protein + totals.carbs + totals.fat > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: 'Protein', value: totals.protein * 4, color: '#2E9D59' },
-                        { name: 'Carbs', value: totals.carbs * 4, color: '#A8DDB5' },
-                        { name: 'Fat', value: totals.fat * 9, color: '#176B3A' },
-                      ].filter((d) => d.value > 0)}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={90}
-                      labelLine={false}
-                    >
-                      {[
-                        { fill: '#2E9D59' },
-                        { fill: '#A8DDB5' },
-                        { fill: '#176B3A' },
-                      ].map((entry, i) => (
-                        <Cell key={`cell-${i}`} fill={entry.fill} />
-                      ))}
-                      <Tooltip formatter={(v: number) => `${v} kcal`} />
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-secondary text-center py-10">
-                  <Flame size={40} strokeWidth={1} className="mb-2 opacity-30" />
-                  <p>No meals logged for {date}.</p>
+            {macroData.length ? (
+              <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-around">
+                <div className="relative h-[220px] w-full max-w-[240px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={macroData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={62} outerRadius={92} paddingAngle={3} cornerRadius={6} stroke="none">
+                        {macroData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => `${Math.round(v)} kcal`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="stat-number text-[22px] font-semibold text-dark">{Math.round(totals.calories)}</span>
+                    <span className="mt-0.5 text-[9.5px] font-medium uppercase tracking-[0.14em] text-secondary">kcal</span>
+                  </div>
                 </div>
-              )}
-            </div>
+                <div className="w-full max-w-[260px] space-y-3">
+                  {macroData.map((entry) => (
+                    <div key={entry.name} className="flex items-center justify-between gap-3 text-[12.5px]">
+                      <span className="inline-flex items-center gap-2 text-secondary">
+                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                        {entry.name}
+                      </span>
+                      <span className="text-dark">
+                        <span className="font-semibold">{entry.grams.toFixed(1)} g</span>
+                        <span className="ml-2 text-[12px] text-secondary">{Math.round((entry.value / totals.calories) * 100)}%</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-[#FBFDFB] px-5 text-center">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-green-soft text-green-deep"><Flame size={18} strokeWidth={1.8} /></span>
+                <p className="mt-3 text-[13px] font-medium text-dark">No meals logged</p>
+                <p className="mt-1 max-w-[230px] text-[11.5px] leading-relaxed text-secondary">Add a meal to see your calorie split for {formatShort(date)}.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Water */}
-        <Card lg:col-span-1>
+        <Card className="flex flex-col lg:col-span-1">
           <CardHeader>
-            <CardTitle>Water</CardTitle>
-            <CardDescription>{Math.round(waterToday)}ml / {waterTarget}ml</CardDescription>
+            <div>
+              <CardTitle>Water</CardTitle>
+              <CardDescription>{Math.round(waterToday)} ml of {waterTarget} ml today</CardDescription>
+            </div>
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#EAF1FB] text-[#3457A6]">
+              <Droplet size={17} strokeWidth={2} />
+            </span>
           </CardHeader>
-          <CardContent className="flex items-center gap-4">
-            <ProgressRing value={Math.min(100, Math.round((waterToday / waterTarget) * 100))} size={64} thickness={8} label={`${Math.round((waterToday / waterTarget) * 100)}%`} />
-            <div className="flex-1">
-              <p className="text-dark text-sm font-medium">Daily target</p>
-              <p className="text-secondary text-xs">{waterTarget / 1000} L · editable in Settings</p>
+          <CardContent className="flex flex-1 flex-col justify-between gap-5">
+            <div className="flex items-center gap-5">
+              <ProgressRing value={waterPct} size={84} thickness={9} label={`${waterPct}%`} />
+              <div>
+                <p className="stat-number text-[26px] font-semibold leading-none text-dark">
+                  {(waterToday / 1000).toFixed(2)}
+                  <span className="ml-1.5 text-[12px] font-medium text-secondary">L</span>
+                </p>
+                <p className="mt-1.5 text-[11.5px] text-secondary">of {(waterTarget / 1000).toFixed(1)} L · editable in Settings</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-border/70 bg-[#FBFDFB] px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary">Remaining</p>
+                <p className="stat-number mt-1 text-[15px] font-semibold text-dark">{Math.max(0, Math.round(waterTarget - waterToday))} ml</p>
+              </div>
+              <div className="rounded-xl border border-border/70 bg-[#FBFDFB] px-3 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary">Logs today</p>
+                <p className="stat-number mt-1 text-[15px] font-semibold text-dark">{waterLogs}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-secondary">Quick add</p>
+              <div className="mt-2.5 grid grid-cols-3 gap-2">
+                {[250, 500, 750].map((ml) => (
+                  <Button key={ml} variant="outline" size="sm" onClick={() => quickAddWater(ml)}>+{ml} ml</Button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -263,7 +315,7 @@ export function Nutrition() {
               <CardHeader className="flex items-center justify-between pb-2">
                 <div>
                   <CardTitle className="text-sm">{cat.label}</CardTitle>
-                  <CardDescription className="text-[10px]">{Math.round(catCal)} kcal</CardDescription>
+                  <CardDescription className="text-[11px]">{Math.round(catCal)} kcal</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => { setMealForm({ ...mealForm, mealCategory: cat.value }); setAddMealOpen(true); }}>
                   <Plus size={14} strokeWidth={2} />
@@ -279,8 +331,8 @@ export function Nutrition() {
                             <span className="text-dark">{m.foodSnapshot?.name || m.foodName}</span>
                             <span className="text-green-deep font-semibold">{Math.round(m.calories)} cal</span>
                           </div>
-                          <div className="text-[11px] text-secondary">
-                            {m.quantity} {m.unit} · {m.protein.toFixed(1)}P / {m.carbs.toFixed(1)}C / {m.fat.toFixed(1)}F
+                          <div className="text-[12px] text-secondary">
+                            {servingLabel(m.quantity, m.unit)} · P {m.protein.toFixed(1)} g · C {m.carbs.toFixed(1)} g · F {m.fat.toFixed(1)} g
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
@@ -351,7 +403,7 @@ export function Nutrition() {
       )}
 
       <div className="border-t border-border pt-6">
-        <p className="text-[11px] text-secondary">Nutrition values are estimates from your food library and may be incomplete or inaccurate. Not medical advice.</p>
+        <p className="text-[12px] text-secondary">Nutrition values are estimates from your food library and may be incomplete or inaccurate. Not medical advice.</p>
       </div>
     </div>
   );
@@ -359,18 +411,25 @@ export function Nutrition() {
 
 function NutritionStat({ title, value, target, unit, color }: { title: string; value: string | number; target: number; unit: string; color: string }) {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between">
-          <CardTitle className="text-sm">{title}</CardTitle>
-          <span className="text-[10px] text-secondary uppercase">{unit}</span>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-deep-green font-bold text-2xl">{value}</div>
+    <Card padding="none" className="p-5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-secondary">{title}</p>
+        <span className="text-[11px] font-medium text-secondary/80">{unit}</span>
+      </div>
+      <p className="stat-number mt-3 text-[26px] font-semibold leading-none text-dark">{value}</p>
+      <div className="mt-4">
         <ProgressBar value={Math.min(100, Math.round((Number(value) / target) * 100))} color={color} height="6px" />
-        <p className="text-[10px] text-secondary">Target: {target}{unit}</p>
-      </CardContent>
+      </div>
+      <p className="mt-2 text-[11.5px] text-secondary">Target {target.toLocaleString()} {unit}</p>
     </Card>
   );
+}
+
+function servingLabel(quantity: number, unit: string) {
+  if (unit !== 'serving') return `${quantity} ${unit}`;
+  return `${quantity} ${Number(quantity) === 1 ? 'serving' : 'servings'}`;
+}
+
+function formatShort(dateStr: string) {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }

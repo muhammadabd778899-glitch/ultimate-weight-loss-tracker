@@ -3,7 +3,7 @@
  */
 
 import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
+import { Card, CardFooter } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -119,61 +119,73 @@ export function Goals() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Goals & Challenges</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Goals & Challenges</h1>
         <Button onClick={() => setAddOpen(true)} size="sm">
           <Plus size={16} strokeWidth={2} /> Add Goal
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {goals.map((g) => {
           const pct = goalProgressPct(g);
           const ms = milestones.filter((m) => m.goalId === g.id);
           const achieved = ms.filter((m) => m.achievedAt).length;
           return (
-            <Card key={g.id} className="flex flex-col h-full">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-sm">{g.name}</CardTitle>
-                    <CardDescription className="text-[10px] text-secondary">{g.category} · {g.direction}</CardDescription>
-                  </div>
-                  <span className="text-green-deep font-bold">{pct}%</span>
+            <Card key={g.id} padding="md" className="flex h-full flex-col">
+              <div className="flex items-start justify-between gap-3">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-green-soft text-green-deep">
+                  <Flame size={18} strokeWidth={2} />
+                </span>
+                <span className="stat-number rounded-full bg-green-soft px-3 py-1 text-[12.5px] font-semibold text-green-deep">{pct}%</span>
+              </div>
+              <h3 className="mt-3 pr-2 text-[15px] font-semibold leading-snug tracking-tight text-dark">{g.name}</h3>
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-secondary">
+                {categoryLabel(g.category)} · {g.direction}
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
+                <span className="stat-number text-[24px] font-semibold leading-none text-dark">{formatValue(g.currentProgress)}</span>
+                <span className="text-[12.5px] font-medium text-secondary">{g.unit}</span>
+                <span className="text-[12.5px] text-secondary">of {formatValue(g.targetValue)} {g.unit}</span>
+              </div>
+              <div className="mt-3">
+                <ProgressBar value={pct} height="7px" />
+                <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-secondary">
+                  <span>{achieved} / {ms.length} milestones</span>
+                  <span>Target {formatGoalDate(g.targetDate)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-secondary mt-1">
-                  <span>{g.startingValue}{g.unit} → {g.targetValue}{g.unit}</span>
-                  <span>· {g.currentProgress}{g.unit} now</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ProgressBar value={pct} />
-                <div className="flex justify-between text-[10px] text-secondary mt-2">
-                  <span>Milestones: {achieved} / {ms.length} achieved</span>
-                  <span>Target: {g.targetDate}</span>
-                </div>
-              </CardContent>
-              <CardFooter className="pt-2">
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => updateProgress(g.id, Number(window.prompt('New value:', g.currentProgress.toString()) || g.currentProgress))}>
-                    <ArrowUpRight size={14} strokeWidth={2} /> Update
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => addMilestone(g.id)}>+ Milestone</Button>
-                  <Button variant="outline" size="sm" onClick={() => deleteGoal(g.id)}>
-                    <Trash2 size={14} strokeWidth={2} />
-                  </Button>
-                </div>
+              </div>
+
+              <CardFooter className="pt-4">
+                <Button variant="ghost" size="sm" onClick={() => updateProgress(g.id, Number(window.prompt('New value:', g.currentProgress.toString()) || g.currentProgress))}>
+                  <ArrowUpRight size={14} strokeWidth={2} /> Update
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => addMilestone(g.id)}>+ Milestone</Button>
+                <Button variant="outline" size="sm" className="ml-auto" onClick={() => deleteGoal(g.id)} aria-label={`Delete ${g.name}`}>
+                  <Trash2 size={14} strokeWidth={2} />
+                </Button>
               </CardFooter>
             </Card>
           );
         })}
         {goals.length === 0 && (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center text-center py-8">
-              <Flame size={32} strokeWidth={1} className="mb-2 opacity-40" />
-              <p className="text-secondary">No goals yet. Set your own personal goal.</p>
-            </CardContent>
+          <Card padding="lg" className="md:col-span-2 xl:col-span-3">
+            <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="max-w-xl">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-green-soft text-green-deep">
+                  <Flame size={22} strokeWidth={1.9} />
+                </span>
+                <h2 className="mt-4 text-lg font-semibold tracking-tight text-dark">Set a goal you control</h2>
+                <p className="mt-2 text-[13px] leading-relaxed text-secondary">
+                  Choose a target, track progress against it, and add milestones along the way. You set the pace — this app never prescribes aggressive weight loss.
+                </p>
+              </div>
+              <Button onClick={() => setAddOpen(true)} className="shrink-0">
+                <Plus size={16} strokeWidth={2} /> Create your first goal
+              </Button>
+            </div>
           </Card>
         )}
       </div>
@@ -195,7 +207,7 @@ export function Goals() {
             </div>
             <Input type="number" value={goalForm.currentProgress.toString()} onChange={(e) => setGoalForm({ ...goalForm, currentProgress: Number(e.target.value) || 0 })} placeholder="Current progress" />
             <Input label="Notes (optional)" value={goalForm.notes} onChange={(e) => setGoalForm({ ...goalForm, notes: e.target.value })} />
-            <div className="text-[11px] text-secondary">You control your targets. This app never prescribes aggressive weight loss.</div>
+            <div className="text-[12px] text-secondary">You control your targets. This app never prescribes aggressive weight loss.</div>
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
               <Button type="submit">Create Goal</Button>
@@ -205,4 +217,19 @@ export function Goals() {
       )}
     </div>
   );
+}
+
+function formatValue(value: number) {
+  const n = Number(value) || 0;
+  return n.toLocaleString(undefined, { maximumFractionDigits: 1 });
+}
+
+function formatGoalDate(dateStr: string) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function categoryLabel(category: string) {
+  return CATEGORIES.find((c) => c.value === category)?.label ?? category;
 }

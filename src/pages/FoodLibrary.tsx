@@ -103,15 +103,15 @@ export function FoodLibrary() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Food Library</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Food Library</h1>
         <Button onClick={() => setAddOpen(true)} size="sm">
           <Plus size={16} strokeWidth={2} /> Add Food
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row md:items-end gap-4">
         <div className="flex-1">
           <SearchFilter onSearch={setSearch} placeholder="Search foods or brand..." />
         </div>
@@ -135,32 +135,28 @@ export function FoodLibrary() {
           <div className="space-y-2">
             {filtered.length ? (
               filtered.map((f) => (
-                <div key={f.id} className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-green-soft/50 transition-colors">
-                  <div className="flex-1">
+                <div key={f.id} className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-[#FBFDFB] px-4 py-2.5 transition-colors hover:border-green-mint/60">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-dark font-medium">{f.name}</span>
-                      {f.brand && <span className="text-[10px] text-secondary border border-border/50 rounded px-1.5">{f.brand}</span>}
-                      {f.isFavorite && <Star size={14} strokeWidth={2} fill="#E7BB59" className="text-yellow-500" />}
+                      <span className="truncate text-[13.5px] font-semibold text-dark">{f.name}</span>
+                      {f.brand && <span className="hidden shrink-0 rounded-full border border-border/70 bg-white px-2 py-0.5 text-[10.5px] text-secondary sm:inline">{f.brand}</span>}
+                      {f.isFavorite && <Star size={13} strokeWidth={2} fill="#E7BB59" className="shrink-0 text-[#E7BB59]" />}
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-secondary mt-1">
-                      <span>{f.category}</span>
-                      <span>· {f.servingSize}{f.servingUnit}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-green-deep font-semibold">{f.calories} cal</span>
-                      <span className="text-secondary">{f.protein.toFixed(1)}P</span>
-                      <span className="text-secondary">{f.carbs.toFixed(1)}C</span>
-                      <span className="text-secondary">{f.fat.toFixed(1)}F</span>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11.5px] text-secondary">
+                      <span className="capitalize">{f.category}</span>
+                      <span>{f.servingSize} {f.servingUnit}</span>
+                      <span className="font-semibold text-green-deep">{Math.round(f.calories)} cal</span>
+                      <span className="hidden sm:inline">P {f.protein.toFixed(1)} · C {f.carbs.toFixed(1)} · F {f.fat.toFixed(1)} g</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={() => loadForEdit(f.id)} title="Edit">
                       <Edit2 size={16} strokeWidth={2} />
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => toggleFavorite(f.id, f.isFavorite)} title={f.isFavorite ? 'Unfavorite' : 'Favorite'}>
                       <Star size={16} strokeWidth={2} fill={f.isFavorite ? '#E7BB59' : 'none'} />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => duplicate(f.id)} title="Duplicate">
+                    <Button variant="ghost" size="sm" onClick={() => duplicate(f.id)} title="Duplicate" className="hidden sm:inline-flex">
                       <Copy size={16} strokeWidth={2} />
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => deleteFood(f.id)} title="Delete">

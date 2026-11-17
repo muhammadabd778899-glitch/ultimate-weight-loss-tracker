@@ -254,14 +254,7 @@ export function buildDashboardSnapshot({
     currentWeight: wStats.current ?? 0,
     weightChange: wStats.change ?? 0,
     goalProgressPct: goals.length
-      ? Math.round(
-          goals.reduce((sum, g) => {
-            const span = Math.max(1, daysBetween(parseLocalDate(g.startDate), parseLocalDate(g.targetDate)));
-            const elapsed = Math.max(0, daysBetween(parseLocalDate(g.startDate), parseLocalDate(now)));
-            const pct = Math.min(100, Math.max(0, (elapsed / span) * 100));
-            return sum + pct;
-          }, 0) / goals.length,
-        )
+      ? Math.round(goals.reduce((sum, g) => sum + goalProgressPct(g), 0) / goals.length)
       : undefined,
     todayCalories: Math.round(dayTotals.calories),
     todayProtein: Math.round(dayTotals.protein * 10) / 10,
@@ -277,17 +270,14 @@ export function buildDashboardSnapshot({
 /* ---------------------------------------------------------------- */
 
 export function goalProgressPct(goal: Goal): number {
-  const span = Math.max(1, daysBetween(parseLocalDate(goal.startDate), parseLocalDate(goal.targetDate)));
-  const elapsed = Math.max(0, daysBetween(parseLocalDate(goal.startDate), parseLocalDate(today())));
-  const timePct = Math.min(100, Math.max(0, (elapsed / span) * 100));
   const range = goal.targetValue - goal.startingValue;
-  const valuePct =
-    range === 0
-      ? goal.currentProgress >= goal.targetValue
-        ? 100
-        : 0
-      : Math.min(100, Math.max(0, Math.abs((goal.currentProgress - goal.startingValue) / range) * 100));
-  return Math.round((timePct + valuePct) / 2);
+  if (range === 0) {
+    const span = Math.max(1, daysBetween(parseLocalDate(goal.startDate), parseLocalDate(goal.targetDate)));
+    const elapsed = Math.max(0, daysBetween(parseLocalDate(goal.startDate), parseLocalDate(today())));
+    const timePct = Math.min(100, Math.max(0, (elapsed / span) * 100));
+    return Math.round(goal.currentProgress >= goal.targetValue ? 100 : timePct);
+  }
+  return Math.round(Math.min(100, Math.max(0, Math.abs((goal.currentProgress - goal.startingValue) / range) * 100)));
 }
 
 export function formatUnitValue(value: number, unit: string): string {

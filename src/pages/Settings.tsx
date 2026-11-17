@@ -6,7 +6,7 @@ import { Select } from '../components/ui/Select';
 import { db } from '../db';
 import { generateDemoData } from '../services/demo-data';
 import { exportJSON, backupToJsonString, validateBackup, importJSON, downloadJson } from '../services/export-import';
-import { Upload, Download, Trash2, RefreshCw, Settings as SettingsIcon } from 'lucide-react';
+import { Upload, Download, Trash2, RefreshCw } from 'lucide-react';
 import { success, error } from '../services/toast';
 import { UserProfile } from '../types';
 
@@ -130,10 +130,9 @@ export function Settings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-7">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h1 className="text-deep-green font-bold text-2xl">Settings</h1>
-        <Button size="sm"><SettingsIcon size={16} strokeWidth={2} /></Button>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-dark sm:text-[30px]">Settings</h1>
       </div>
       <Card>
         <CardHeader>
@@ -170,16 +169,16 @@ export function Settings() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-dark">Export backup</p>
-                <p className="text-[11px] text-secondary">Download all records as JSON. Includes settings and image data references.</p>
+                <p className="text-[12px] text-secondary">Download all records as JSON. Includes settings and image data references.</p>
               </div>
               <Button onClick={handleExport} size="sm"><Download size={16} strokeWidth={2} /> Export</Button>
             </div>
             <div className="flex items-center justify-between border-t border-border pt-4">
               <div>
                 <p className="text-sm font-medium text-dark">Import backup</p>
-                <p className="text-[11px] text-secondary">Replace current data from a JSON backup file.</p>
+                <p className="text-[12px] text-secondary">Replace current data from a JSON backup file.</p>
               </div>
-              <label className="flex items-center gap-2 rounded-md border border-border bg-surface p-2 cursor-pointer text-sm">
+              <label className="flex items-center gap-2 rounded-xl border border-border bg-white p-2 cursor-pointer text-sm">
                 <input type="file" accept=".json" className="hidden" onChange={(e) => e.target.files?.[0] && handleImportFile(e.target.files![0])} />
                 <Upload size={16} strokeWidth={2} /> Choose file
               </label>
@@ -195,13 +194,13 @@ export function Settings() {
         <CardContent>
           <div className="space-y-4">
             <div className="p-4 rounded-lg border border-border bg-green-soft/50">
-              <p className="text-[11px] text-secondary mb-2">Demo mode loads realistic fictional data (60 days of weights, meals, workouts, habits, recipes, and more) so you can explore every module.</p>
+              <p className="text-[12px] text-secondary mb-2">Demo mode loads realistic fictional data (60 days of weights, meals, workouts, habits, recipes, and more) so you can explore every module.</p>
               <Button onClick={handleLoadDemo} size="sm" className="w-auto">
                 <RefreshCw size={16} strokeWidth={2} /> Load Demo Data
               </Button>
             </div>
             <div className="p-4 rounded-lg border border-border bg-attention/20">
-              <p className="text-[11px] text-attention font-medium mb-2">⚠ Destructive action</p>
+              <p className="text-[12px] text-attention font-medium mb-2">⚠ Destructive action</p>
               <Button onClick={handleClearAll} variant="outline" size="sm" className="w-auto text-attention border-attention hover:bg-attention/10">
                 <Trash2 size={16} strokeWidth={2} /> Clear All Personal Data
               </Button>
@@ -215,9 +214,9 @@ export function Settings() {
           <CardDescription>This app is a personal tracking tool, not a medical device.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="p-4 rounded-lg border border-border bg-surface">
-            <p className="text-[11px] text-secondary text-sm">"This application is designed for personal fitness, nutrition, and wellness tracking. It does not provide medical advice, diagnosis, or treatment. Calculations and nutrition values are estimates and may be inaccurate. Consult a qualified healthcare professional before making health-related changes, especially if you have a medical condition, are pregnant, are under 18, or have specific dietary or exercise needs."</p>
-            <p className="text-[11px] text-secondary mt-2">BMI is informational only. Estimated exercise calories are not exact. Targets are editable and never prescribed. Body measurements and photos are optional.</p>
+          <div className="p-4 rounded-xl border border-border bg-white">
+            <p className="text-[12px] text-secondary text-sm">"This application is designed for personal fitness, nutrition, and wellness tracking. It does not provide medical advice, diagnosis, or treatment. Calculations and nutrition values are estimates and may be inaccurate. Consult a qualified healthcare professional before making health-related changes, especially if you have a medical condition, are pregnant, are under 18, or have specific dietary or exercise needs."</p>
+            <p className="text-[12px] text-secondary mt-2">BMI is informational only. Estimated exercise calories are not exact. Targets are editable and never prescribed. Body measurements and photos are optional.</p>
           </div>
         </CardContent>
       </Card>
