@@ -1,0 +1,17 @@
+{
+  "name": "Ultimate Weight Loss & Fitness Tracker",
+  "short_name": "Wellness Tracker",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F6FBF6",
+  "theme_color": "#2E9D59",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "description": "Premium offline-first personal wellness and weight loss tracker."
+}
